@@ -5,3 +5,6 @@ dist
 .env.local
 .env.*.local
 firebase-key.json
+# Allow example env files to be committed
+!.env.local.example
+!.env.example
