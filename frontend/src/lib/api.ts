@@ -4,7 +4,9 @@ export async function apiRequest(
   body: unknown,
   token: string
 ) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiBase) throw new Error("NEXT_PUBLIC_API_URL not set");
+  const res = await fetch(`${apiBase}${url}`, {
     method,
     headers: {
       "Content-Type": "application/json",
