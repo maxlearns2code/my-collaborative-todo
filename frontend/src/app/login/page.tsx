@@ -1,7 +1,12 @@
 "use client";
 
 import { FirebaseError } from "firebase/app";
-import { UserCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  UserCredential,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { auth } from "../../lib/firebase";
 
@@ -12,6 +17,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [registerMode, setRegisterMode] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +39,7 @@ export default function LoginPage() {
       }
       const idToken = await userCredential.user.getIdToken();
       setToken(idToken);
+      router.push("/todos");
     } catch (err: unknown) {
       let message = "Authentication failed.";
       if (err instanceof FirebaseError) {
