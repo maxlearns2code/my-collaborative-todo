@@ -1,6 +1,7 @@
 "use client";
 
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import { UserCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../../lib/firebase";
 
@@ -9,27 +10,34 @@ export default function LoginPage() {
   const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [registerMode, setRegisterMode] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        pass
-      );
+      let userCredential: UserCredential;
+      if (registerMode) {
+        // Registration flow
+        userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          pass
+        );
+      } else {
+        // Login flow
+        userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      }
       const idToken = await userCredential.user.getIdToken();
       setToken(idToken);
-      // You can now use ID token for backend requests
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to login.");
+      let message = "Authentication failed.";
+      if (err instanceof FirebaseError) {
+        message = err.message;
       }
+      setError(message);
       setToken(null);
     } finally {
       setLoading(false);
@@ -38,8 +46,8 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: 24 }}>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+      <h2>{registerMode ? "Register" : "Login"}</h2>
+      <form onSubmit={handleSubmit}>
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -61,7 +69,29 @@ export default function LoginPage() {
           disabled={loading}
           style={{ width: "100%", padding: 8 }}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading
+            ? registerMode
+              ? "Registering..."
+              : "Logging in..."
+            : registerMode
+            ? "Register"
+            : "Login"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setRegisterMode(!registerMode)}
+          style={{
+            width: "100%",
+            padding: 8,
+            marginTop: 8,
+            background: "#eee",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          {registerMode
+            ? "Already have an account? Log In"
+            : "Don't have an account? Register"}
         </button>
         {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
         {token && (
