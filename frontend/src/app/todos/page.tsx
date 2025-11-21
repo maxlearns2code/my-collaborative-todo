@@ -1,8 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { auth } from "../../lib/firebase";
 import { apiRequest } from "../../lib/api";
+import { auth } from "../../lib/firebase";
 import type { Todo } from "../../types/todo";
 
 export default function TodosPage() {
@@ -11,6 +12,17 @@ export default function TodosPage() {
   const [token, setToken] = useState<string | null>(null);
   const [newTodo, setNewTodo] = useState({ title: "", description: "" });
   const [error, setError] = useState("");
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        router.push("/"); // Redirect to home if not logged in
+      }
+    });
+    return unsubscribe;
+  }, [router]);
 
   // Get token on mount
   useEffect(() => {
@@ -75,9 +87,7 @@ export default function TodosPage() {
         { ...todo, status: todo.status === "open" ? "done" : "open" },
         token
       );
-      setTodos((prev) =>
-        prev.map((t) => (t.id === updated.id ? updated : t))
-      );
+      setTodos((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } catch {
       setError("Failed to update todo.");
     } finally {
@@ -91,9 +101,7 @@ export default function TodosPage() {
       <form onSubmit={handleCreateTodo} style={{ marginBottom: 16 }}>
         <input
           value={newTodo.title}
-          onChange={(e) =>
-            setNewTodo((t) => ({ ...t, title: e.target.value }))
-          }
+          onChange={(e) => setNewTodo((t) => ({ ...t, title: e.target.value }))}
           type="text"
           placeholder="Todo title"
           required
@@ -137,6 +145,13 @@ export default function TodosPage() {
           </li>
         ))}
       </ul>
+      <button
+        onClick={() => router.push("/")}
+        className="btn"
+        aria-label="Go to Home"
+      >
+        ← Back to Home
+      </button>
     </div>
   );
 }
