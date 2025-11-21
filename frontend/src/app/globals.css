@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.btn {
+  @apply px-6 py-2 text-lg bg-gray-100 text-gray-900 rounded border border-gray-300 hover:bg-gray-200 transition-all mr-3;
+}
+
