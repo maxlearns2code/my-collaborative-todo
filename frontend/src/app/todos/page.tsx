@@ -7,6 +7,9 @@ import type { Todo } from "../../types/todo";
 import type { User } from "../../types/user";
 import { AssignSelect } from "../../components/todo/AssignSelect";
 import { TodoCard } from "../../components/todo/TodoCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
 export default function TodosPage() {
@@ -127,59 +130,56 @@ export default function TodosPage() {
   };
 
   return (
-    <div style={{ maxWidth: 500, margin: "40px auto", padding: 24 }}>
-      <h2>My Collaborative Todos</h2>
-      <form onSubmit={handleCreateTodo} style={{ marginBottom: 16 }}>
-        <input
-          value={newTodo.title}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange("title", e.target.value)}
-          type="text"
-          placeholder="Todo title"
-          required
-          style={{ width: "100%", marginBottom: 8, padding: 8 }}
-        />
-        <input
-          value={newTodo.description}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange("description", e.target.value)}
-          type="text"
-          placeholder="Description"
-          style={{ width: "100%", marginBottom: 8, padding: 8 }}
-        />
-        <AssignSelect
-          users={users}
-          selected={newTodo.assigneeIds}
-          onChange={(ids: string[]) => handleFormChange("assigneeIds", ids)}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ width: "100%", padding: 8, marginTop: 8 }}
+    <main className="bg-gray-50 min-h-screen flex justify-center py-10">
+      <div className="w-full max-w-2xl flex flex-col gap-4">
+        <Card className="p-8 mb-6">
+          <h2 className="text-2xl font-bold mb-4 text-center">My Collaborative Todos</h2>
+          <form onSubmit={handleCreateTodo} className="flex flex-col gap-4">
+            <Input
+              value={newTodo.title}
+              onChange={(e) => handleFormChange("title", e.target.value)}
+              placeholder="Todo title"
+              required
+            />
+            <Input
+              value={newTodo.description}
+              onChange={(e) => handleFormChange("description", e.target.value)}
+              placeholder="Description"
+            />
+            <AssignSelect
+              users={users}
+              selected={newTodo.assigneeIds}
+              onChange={(ids: string[]) => handleFormChange("assigneeIds", ids)}
+            />
+            <Button
+              type="submit"
+              disabled={loading}
+              className="mt-3"
+            >
+              Create Todo
+            </Button>
+          </form>
+          {error && <div className="text-red-600 mt-4">{error}</div>}
+        </Card>
+        {loading && <div className="text-center">Loading...</div>}
+        {todos.map((todo) => (
+          <TodoCard
+            key={todo.id}
+            todo={todo}
+            users={users}
+            onToggleStatus={handleToggleStatus}
+            onEdit={() => {}}
+            onDelete={(todo: Todo) => handleDelete(todo.id)}
+          />
+        ))}
+        <Button
+          variant="outline"
+          onClick={() => router.push("/")}
+          className="mt-6"
         >
-          Create Todo
-        </button>
-      </form>
-
-      {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
-      {loading && <div>Loading...</div>}
-
-      {todos.map((todo) => (
-        <TodoCard
-          key={todo.id}
-          todo={todo}
-          users={users}
-          onToggleStatus={handleToggleStatus}
-          onEdit={() => {}}
-          onDelete={(todo: Todo) => handleDelete(todo.id)}
-        />
-      ))}
-
-      <button
-        onClick={() => router.push("/")}
-        className="btn"
-        aria-label="Go to Home"
-      >
-        ← Back to Home
-      </button>
-    </div>
+          ← Back to Home
+        </Button>
+      </div>
+    </main>
   );
 }
