@@ -9,6 +9,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { auth } from "../../lib/firebase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +19,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [registerMode, setRegisterMode] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -27,18 +29,11 @@ export default function LoginPage() {
     try {
       let userCredential: UserCredential;
       if (registerMode) {
-        // Registration flow
-        userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          pass
-        );
+        userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       } else {
-        // Login flow
         userCredential = await signInWithEmailAndPassword(auth, email, pass);
       }
-      const idToken = await userCredential.user.getIdToken();
-      setToken(idToken);
+      await userCredential.user.getIdToken(); // For debugging: remove token display for production
       router.push("/todos");
     } catch (err: unknown) {
       let message = "Authentication failed.";
@@ -46,70 +41,56 @@ export default function LoginPage() {
         message = err.message;
       }
       setError(message);
-      setToken(null);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "40px auto", padding: 24 }}>
-      <h2>{registerMode ? "Register" : "Login"}</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-          placeholder="Email"
-          required
-          style={{ width: "100%", marginBottom: 10, padding: 8 }}
-        />
-        <input
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-          type="password"
-          placeholder="Password"
-          required
-          style={{ width: "100%", marginBottom: 10, padding: 8 }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ width: "100%", padding: 8 }}
-        >
-          {loading
-            ? registerMode
-              ? "Registering..."
-              : "Logging in..."
-            : registerMode
-            ? "Register"
-            : "Login"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setRegisterMode(!registerMode)}
-          style={{
-            width: "100%",
-            padding: 8,
-            marginTop: 8,
-            background: "#eee",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          {registerMode
-            ? "Already have an account? Log In"
-            : "Don't have an account? Register"}
-        </button>
-        {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
-        {token && (
-          <div style={{ marginTop: 10, wordBreak: "break-all" }}>
-            <strong>ID Token:</strong>
-            <br />
-            <span>{token}</span>
-          </div>
+    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="p-8 w-full max-w-sm shadow-lg">
+        <h2 className="text-2xl font-bold text-center mb-4">
+          {registerMode ? "Register" : "Login"}
+        </h2>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Email"
+            required
+          />
+          <Input
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            type="password"
+            placeholder="Password"
+            required
+          />
+          <Button type="submit" disabled={loading}>
+            {loading
+              ? registerMode
+                ? "Registering..."
+                : "Logging in..."
+              : registerMode
+              ? "Register"
+              : "Login"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setRegisterMode((m) => !m)}
+            className="w-full"
+          >
+            {registerMode
+              ? "Already have an account? Log In"
+              : "Don't have an account? Register"}
+          </Button>
+        </form>
+        {error && (
+          <div className="text-red-600 text-center text-sm mt-4">{error}</div>
         )}
-      </form>
-    </div>
+      </Card>
+    </main>
   );
 }
