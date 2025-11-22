@@ -10,6 +10,7 @@ import { TodoCard } from "../../components/todo/TodoCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Dialog } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 
 export default function TodosPage() {
@@ -24,6 +25,8 @@ export default function TodosPage() {
     description: "",
     assigneeIds: []
   });
+  const [editTodo, setEditTodo] = useState<Todo | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const [error, setError] = useState("");
 
   // Auth redirect
@@ -78,11 +81,12 @@ export default function TodosPage() {
     fetchTodos();
   }, [token]);
 
-  // Typed form change handler
+  // Create todo form handler
   const handleFormChange = (field: "title" | "description" | "assigneeIds", value: string | string[]) => {
     setNewTodo((t) => ({ ...t, [field]: value }));
   };
 
+  // Create todo
   const handleCreateTodo = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!token) return;
@@ -98,6 +102,29 @@ export default function TodosPage() {
     }
   };
 
+  // Edit modal form handlers
+  const handleEditTitle = (v: string) => setEditTodo((t) => t ? { ...t, title: v } : t);
+  const handleEditDescription = (v: string) => setEditTodo((t) => t ? { ...t, description: v } : t);
+  const handleEditAssignees = (ids: string[]) => setEditTodo((t) => t ? { ...t, assigneeIds: ids } : t);
+
+  // Update todo (modal)
+  const handleUpdateTodo = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!token || !editTodo) return;
+    setLoading(true);
+    try {
+      const updated = await apiRequest(`/todos/${editTodo.id}`, "PUT", editTodo, token);
+      setTodos(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+      setEditTodo(null);
+      setEditOpen(false);
+    } catch {
+      setError("Failed to update todo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle status
   const handleToggleStatus = async (todo: Todo) => {
     if (!token) return;
     setLoading(true);
@@ -116,6 +143,7 @@ export default function TodosPage() {
     }
   };
 
+  // Delete todo
   const handleDelete = async (id: string) => {
     if (!token) return;
     setLoading(true);
@@ -132,6 +160,7 @@ export default function TodosPage() {
   return (
     <main className="bg-gray-50 min-h-screen flex justify-center py-10">
       <div className="w-full max-w-2xl flex flex-col gap-4">
+        {/* Create Todo Card */}
         <Card className="p-8 mb-6">
           <h2 className="text-2xl font-bold mb-4 text-center">My Collaborative Todos</h2>
           <form onSubmit={handleCreateTodo} className="flex flex-col gap-4">
@@ -162,13 +191,18 @@ export default function TodosPage() {
           {error && <div className="text-red-600 mt-4">{error}</div>}
         </Card>
         {loading && <div className="text-center">Loading...</div>}
+
+        {/* Todos List */}
         {todos.map((todo) => (
           <TodoCard
             key={todo.id}
             todo={todo}
             users={users}
             onToggleStatus={handleToggleStatus}
-            onEdit={() => {}}
+            onEdit={() => {
+              setEditTodo(todo);
+              setEditOpen(true);
+            }}
             onDelete={(todo: Todo) => handleDelete(todo.id)}
           />
         ))}
@@ -179,6 +213,49 @@ export default function TodosPage() {
         >
           ← Back to Home
         </Button>
+
+        {/* Modal-based Edit */}
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          {editOpen && (
+            <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center transition-all">
+              <Card className="w-full max-w-md p-6">
+                <form onSubmit={handleUpdateTodo} className="flex flex-col gap-4">
+                  <h3 className="text-xl font-bold mb-2">Edit Todo</h3>
+                  <Input
+                    value={editTodo?.title ?? ""}
+                    onChange={e => handleEditTitle(e.target.value)}
+                    placeholder="Todo title"
+                    required
+                  />
+                  <Input
+                    value={editTodo?.description ?? ""}
+                    onChange={e => handleEditDescription(e.target.value)}
+                    placeholder="Description"
+                  />
+                  <AssignSelect
+                    users={users}
+                    selected={editTodo?.assigneeIds ?? []}
+                    onChange={handleEditAssignees}
+                  />
+                  <div className="flex gap-2 mt-3">
+                    <Button type="submit" disabled={loading}>Update</Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setEditOpen(false);
+                        setEditTodo(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+                {error && <div className="text-red-600 mt-4">{error}</div>}
+              </Card>
+            </div>
+          )}
+        </Dialog>
       </div>
     </main>
   );
