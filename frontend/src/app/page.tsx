@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { auth } from "../lib/firebase";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,44 +25,40 @@ export default function Home() {
   };
 
   return (
-    <main style={{ maxWidth: 600, margin: "60px auto", padding: 24 }}>
-      <h1>Welcome to Collaborative Todo!</h1>
-      <p>
-        Organize, share, and collaborate on tasks with your team. Register or login to get started.
-      </p>
-      <div style={{ marginTop: 32 }}>
-        {!isLoggedIn ? (
-          <Link href="/login">
-            <button className="btn">Login / Register</button>
-          </Link>
-        ) : (
-          <>
-            <Link href="/todos">
-              <button className="btn">Go to My Todos</button>
+    <main className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="flex flex-col items-center gap-6 p-10 w-full max-w-md shadow-lg">
+        <h1 className="text-3xl font-bold text-center">Welcome to Collaborative Todo!</h1>
+        <p className="text-center text-lg text-muted-foreground">
+          Organize, share, and collaborate on tasks with your team.<br />
+          Register or login to get started.
+        </p>
+        <div className="mt-2 flex gap-4">
+          {!isLoggedIn ? (
+            <Link href="/login">
+              <Button size="lg">Login / Register</Button>
             </Link>
-            <button
-              onClick={handleLogout}
-              className="btn"
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-      {isLoggedIn && userEmail && (
-        <div
-          style={{
-            marginTop: 24,
-            padding: 16,
-            background: "#f8f8ff",
-            borderRadius: 8,
-            fontSize: 16,
-            color: "#333",
-          }}
-        >
-          <strong>Logged in as:</strong> {userEmail}
+          ) : (
+            <>
+              <Link href="/todos">
+                <Button size="lg">Go to My Todos</Button>
+              </Link>
+              <Button variant="outline" size="lg" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          )}
         </div>
-      )}
+        {isLoggedIn && userEmail && (
+          <div className="mt-6 p-3 bg-gray-100 rounded-lg text-center w-full">
+            <strong>Logged in as:</strong> {userEmail}
+          </div>
+        )}
+        <div className="mt-10 text-center text-gray-400 text-sm">
+          • Real-time collaboration<br />
+          • Assign tasks to your team<br />
+          • Progress tracking and analytics
+        </div>
+      </Card>
     </main>
   );
 }
