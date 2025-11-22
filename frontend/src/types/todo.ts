@@ -4,7 +4,7 @@ export interface Todo {
   description?: string;
   status: "open" | "done";
   ownerId: string;
-  participants: string[];
+  assigneeIds: string[];
   createdAt: number;
   updatedAt: number;
 }

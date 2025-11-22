@@ -1,20 +1,29 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../lib/api";
 import { auth } from "../../lib/firebase";
 import type { Todo } from "../../types/todo";
+import type { User } from "../../types/user";
+import { AssignSelect } from "../../components/todo/AssignSelect";
+import { TodoCard } from "../../components/todo/TodoCard";
+import { useRouter } from "next/navigation";
 
 export default function TodosPage() {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [newTodo, setNewTodo] = useState({ title: "", description: "" });
-  const [error, setError] = useState("");
-
   const router = useRouter();
 
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [newTodo, setNewTodo] = useState<{ title: string; description: string; assigneeIds: string[] }>({
+    title: "",
+    description: "",
+    assigneeIds: []
+  });
+  const [error, setError] = useState("");
+
+  // Auth redirect
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
@@ -35,26 +44,50 @@ export default function TodosPage() {
     fetchToken();
   }, []);
 
-  // Fetch todos
+  // Fetch users for assignment dropdown
   useEffect(() => {
-    if (token) {
-      setLoading(true);
-      apiRequest("/todos", "GET", null, token)
-        .then(setTodos)
-        .catch(() => setError("Failed to fetch todos."))
-        .finally(() => setLoading(false));
-    }
+    const fetchUsers = async () => {
+      if (!token) return;
+      try {
+        const usersList = await apiRequest("/users", "GET", null, token);
+        setUsers(usersList);
+      } catch {
+        setError("Failed to fetch users.");
+      }
+    };
+    fetchUsers();
   }, [token]);
 
-  // Create todo
-  const handleCreateTodo = async (e: React.FormEvent) => {
+  // Fetch todos
+  useEffect(() => {
+    const fetchTodos = async () => {
+      if (!token) return;
+      setLoading(true);
+      try {
+        const todosData = await apiRequest("/todos", "GET", null, token);
+        setTodos(todosData);
+      } catch {
+        setError("Failed to fetch todos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTodos();
+  }, [token]);
+
+  // Typed form change handler
+  const handleFormChange = (field: "title" | "description" | "assigneeIds", value: string | string[]) => {
+    setNewTodo((t) => ({ ...t, [field]: value }));
+  };
+
+  const handleCreateTodo = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!token) return;
     setLoading(true);
     try {
       const created = await apiRequest("/todos", "POST", newTodo, token);
       setTodos((prev) => [...prev, created]);
-      setNewTodo({ title: "", description: "" });
+      setNewTodo({ title: "", description: "", assigneeIds: [] });
     } catch {
       setError("Failed to create todo.");
     } finally {
@@ -62,21 +95,6 @@ export default function TodosPage() {
     }
   };
 
-  // Delete todo
-  const handleDelete = async (id: string) => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      await apiRequest(`/todos/${id}`, "DELETE", null, token);
-      setTodos((prev) => prev.filter((todo) => todo.id !== id));
-    } catch {
-      setError("Failed to delete todo.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Toggle status
   const handleToggleStatus = async (todo: Todo) => {
     if (!token) return;
     setLoading(true);
@@ -95,13 +113,26 @@ export default function TodosPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      await apiRequest(`/todos/${id}`, "DELETE", null, token);
+      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    } catch {
+      setError("Failed to delete todo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ maxWidth: 500, margin: "40px auto", padding: 24 }}>
       <h2>My Collaborative Todos</h2>
       <form onSubmit={handleCreateTodo} style={{ marginBottom: 16 }}>
         <input
           value={newTodo.title}
-          onChange={(e) => setNewTodo((t) => ({ ...t, title: e.target.value }))}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange("title", e.target.value)}
           type="text"
           placeholder="Todo title"
           required
@@ -109,17 +140,20 @@ export default function TodosPage() {
         />
         <input
           value={newTodo.description}
-          onChange={(e) =>
-            setNewTodo((t) => ({ ...t, description: e.target.value }))
-          }
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormChange("description", e.target.value)}
           type="text"
           placeholder="Description"
           style={{ width: "100%", marginBottom: 8, padding: 8 }}
         />
+        <AssignSelect
+          users={users}
+          selected={newTodo.assigneeIds}
+          onChange={(ids: string[]) => handleFormChange("assigneeIds", ids)}
+        />
         <button
           type="submit"
           disabled={loading}
-          style={{ width: "100%", padding: 8 }}
+          style={{ width: "100%", padding: 8, marginTop: 8 }}
         >
           Create Todo
         </button>
@@ -128,23 +162,17 @@ export default function TodosPage() {
       {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
       {loading && <div>Loading...</div>}
 
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id} style={{ marginBottom: 12 }}>
-            <strong>{todo.title}</strong> - {todo.status}
-            <div>{todo.description}</div>
-            <button onClick={() => handleToggleStatus(todo)}>
-              Mark as {todo.status === "open" ? "done" : "open"}
-            </button>
-            <button
-              style={{ marginLeft: 8, color: "red" }}
-              onClick={() => handleDelete(todo.id)}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      {todos.map((todo) => (
+        <TodoCard
+          key={todo.id}
+          todo={todo}
+          users={users}
+          onToggleStatus={handleToggleStatus}
+          onEdit={() => {}}
+          onDelete={(todo: Todo) => handleDelete(todo.id)}
+        />
+      ))}
+
       <button
         onClick={() => router.push("/")}
         className="btn"
