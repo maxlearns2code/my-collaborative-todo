@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { auth } from "../firebase.js";
+import { db } from "../firebase.js";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -12,13 +13,12 @@ export const verifyFirebaseToken = async (
   next: NextFunction
 ) => {
   const authHeader = req.headers.authorization;
-  // Only proceed if authHeader exists and starts with Bearer
-  if (typeof authHeader !== 'string' || !authHeader.startsWith("Bearer ")) {
+  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Missing token" });
   }
 
   const token = authHeader.split(" ")[1];
-  if (typeof token !== 'string' || !token) {
+  if (typeof token !== "string" || !token) {
     return res.status(401).json({ error: "Token not found" });
   }
 
@@ -26,8 +26,26 @@ export const verifyFirebaseToken = async (
     const decoded = await auth.verifyIdToken(token as string);
     req.userId = decoded.uid ?? "";
     req.userEmail = decoded.email ?? "";
+
+    // Ensure Firestore profile exists for this user
+    await ensureFirestoreUser(req.userId, req.userEmail);
+
     next();
   } catch (e) {
     return res.status(401).json({ error: "Invalid token" });
   }
 };
+
+export async function ensureFirestoreUser(uid: string, email: string) {
+  const ref = db.collection("users").doc(uid);
+  const doc = await ref.get();
+  if (!doc.exists) {
+    await ref.set({
+      uid,
+      email,
+      name: "",
+      avatarUrl: ""
+    });
+  }
+}
+

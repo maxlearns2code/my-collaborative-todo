@@ -5,6 +5,7 @@ import {
   UserCredential,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile, // Modular Firebase!
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,6 +17,8 @@ import { Card } from "@/components/ui/card";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [name, setName] = useState("");           
+  const [avatarUrl, setAvatarUrl] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [registerMode, setRegisterMode] = useState(false);
@@ -30,10 +33,19 @@ export default function LoginPage() {
       let userCredential: UserCredential;
       if (registerMode) {
         userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+
+        // Modular Firebase - update user profile
+        await updateProfile(userCredential.user, {
+          displayName: name,
+          photoURL: avatarUrl,
+        });
+        
+        // Optionally, force-refresh token so new claims go into ID token
+        await userCredential.user.getIdToken(true);
+        
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, pass);
       }
-      await userCredential.user.getIdToken(); // For debugging: remove token display for production
       router.push("/todos");
     } catch (err: unknown) {
       let message = "Authentication failed.";
@@ -67,6 +79,23 @@ export default function LoginPage() {
             placeholder="Password"
             required
           />
+          {registerMode && (
+            <>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                type="text"
+                placeholder="Full name"
+                required
+              />
+              <Input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                type="text"
+                placeholder="Avatar URL (optional)"
+              />
+            </>
+          )}
           <Button type="submit" disabled={loading}>
             {loading
               ? registerMode
