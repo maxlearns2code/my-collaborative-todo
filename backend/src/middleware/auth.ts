@@ -27,8 +27,12 @@ export const verifyFirebaseToken = async (
     req.userId = decoded.uid ?? "";
     req.userEmail = decoded.email ?? "";
 
-    // Ensure Firestore profile exists for this user
-    await ensureFirestoreUser(req.userId, req.userEmail);
+    // Pull name and avatar from Firebase Auth JWT, if present
+    const name = decoded.name ?? "";
+    const avatarUrl = decoded.picture ?? "";
+
+    // Ensure Firestore profile exists for this user (with info)
+    await ensureFirestoreUser(req.userId, req.userEmail, name, avatarUrl);
 
     next();
   } catch (e) {
@@ -36,16 +40,20 @@ export const verifyFirebaseToken = async (
   }
 };
 
-export async function ensureFirestoreUser(uid: string, email: string) {
+export async function ensureFirestoreUser(
+  uid: string,
+  email: string,
+  name: string,
+  avatarUrl: string
+) {
   const ref = db.collection("users").doc(uid);
   const doc = await ref.get();
   if (!doc.exists) {
     await ref.set({
       uid,
       email,
-      name: "",
-      avatarUrl: ""
+      name,
+      avatarUrl,
     });
   }
 }
-
