@@ -5,7 +5,7 @@ import {
   UserCredential,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile, // Modular Firebase!
+  updateProfile,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,11 +14,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
+// ---- EMAIL VALIDATION FUNCTION ----
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
-  const [name, setName] = useState("");           
-  const [avatarUrl, setAvatarUrl] = useState(""); 
+  const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [registerMode, setRegisterMode] = useState(false);
@@ -29,20 +34,23 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // ---- EMAIL VALIDATION PRIOR TO SUBMIT ----
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
     try {
       let userCredential: UserCredential;
       if (registerMode) {
         userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-
-        // Modular Firebase - update user profile
         await updateProfile(userCredential.user, {
           displayName: name,
           photoURL: avatarUrl,
         });
-        
-        // Optionally, force-refresh token so new claims go into ID token
         await userCredential.user.getIdToken(true);
-        
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, pass);
       }
@@ -50,7 +58,25 @@ export default function LoginPage() {
     } catch (err: unknown) {
       let message = "Authentication failed.";
       if (err instanceof FirebaseError) {
-        message = err.message;
+        switch (err.code) {
+          case "auth/invalid-email":
+            message = "Invalid email address. Please check and try again.";
+            break;
+          case "auth/email-already-in-use":
+            message = "This email is already registered. Try logging in instead.";
+            break;
+          case "auth/weak-password":
+            message = "Password should be at least 6 characters.";
+            break;
+          case "auth/user-not-found":
+            message = "No account found for this email.";
+            break;
+          case "auth/wrong-password":
+            message = "Incorrect password.";
+            break;
+          default:
+            message = err.message;
+        }
       }
       setError(message);
     } finally {
