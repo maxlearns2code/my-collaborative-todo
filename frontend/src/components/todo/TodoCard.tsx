@@ -1,7 +1,7 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { User } from "../../types/user";
+import { Card } from "@/components/ui/card";
 import type { Todo } from "../../types/todo";
+import type { User } from "../../types/user";
 
 interface TodoCardProps {
   todo: Todo;
@@ -18,7 +18,7 @@ export function TodoCard({
   onEdit,
   onDelete,
 }: TodoCardProps) {
-  const assigneeObjs: User[] = todo.assigneeIds
+  const assigneeObjs: User[] = (todo.assigneeIds ?? [])
     .map((uid: string) => users.find((u: User) => u.uid === uid))
     .filter((u): u is User => Boolean(u));
 
@@ -27,7 +27,13 @@ export function TodoCard({
       <div className="flex justify-between items-center">
         <div>
           <span className="font-bold">{todo.title}</span>
-          <span className={`ml-2 px-2 py-1 rounded text-xs ${todo.status === "done" ? "bg-green-200 text-green-700" : "bg-yellow-200 text-yellow-700"}`}>
+          <span
+            className={`ml-2 px-2 py-1 rounded text-xs ${
+              todo.status === "done"
+                ? "bg-green-200 text-green-700"
+                : "bg-yellow-200 text-yellow-700"
+            }`}
+          >
             {todo.status}
           </span>
         </div>
@@ -35,7 +41,9 @@ export function TodoCard({
       <div className="text-muted-foreground">{todo.description}</div>
       <div className="flex gap-2 items-center my-1">
         {assigneeObjs.map((u: User) => (
-          <span key={u.uid} className="px-2 py-1 rounded bg-gray-100 text-sm">{u.name}</span>
+          <span key={u.uid} className="px-2 py-1 rounded bg-gray-100 text-sm">
+            {u.name || u.email}
+          </span>
         ))}
       </div>
       <div className="flex gap-2 mt-2">
