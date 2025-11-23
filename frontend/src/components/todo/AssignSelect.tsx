@@ -32,13 +32,13 @@ export function AssignSelect({ users, selected, onChange }: AssignSelectProps) {
   return (
     <div>
       <Label>Assign to users</Label>
-      <div className="flex flex-wrap gap-2 mb-2">
+      <div className="flex flex-wrap gap-2 my-2">
         {selected.map(uid => {
           const user = users.find(u => u.uid === uid);
           return user ? (
             <span
               key={uid}
-              className="inline-flex items-center bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm"
+              className="inline-flex items-center bg-gray-200 text-gray-800 px-2 rounded-md text-sm"
             >
               {user.name}
               <Button
