@@ -1,5 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { FirebaseError } from "firebase/app";
 import {
   UserCredential,
@@ -10,9 +14,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { auth } from "../../lib/firebase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 
 // ---- EMAIL VALIDATION FUNCTION ----
 function isValidEmail(email: string) {
@@ -45,7 +46,11 @@ export default function LoginPage() {
     try {
       let userCredential: UserCredential;
       if (registerMode) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+        userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          pass
+        );
         await updateProfile(userCredential.user, {
           displayName: name,
           photoURL: avatarUrl,
@@ -63,7 +68,8 @@ export default function LoginPage() {
             message = "Invalid email address. Please check and try again.";
             break;
           case "auth/email-already-in-use":
-            message = "This email is already registered. Try logging in instead.";
+            message =
+              "This email is already registered. Try logging in instead.";
             break;
           case "auth/weak-password":
             message = "Password should be at least 6 characters.";
@@ -87,34 +93,44 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="p-8 w-full max-w-sm shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-4">
+        <h1 className="text-2xl font-bold text-center mb-4">
           {registerMode ? "Register" : "Login"}
-        </h2>
+        </h1>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <Label htmlFor="login-email">Email</Label>
           <Input
+            id="login-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             placeholder="Email"
             required
           />
+
+          <Label htmlFor="login-password">Password</Label>
           <Input
+            id="login-password"
             value={pass}
             onChange={(e) => setPass(e.target.value)}
             type="password"
             placeholder="Password"
             required
           />
+
           {registerMode && (
             <>
+              <Label htmlFor="register-name">Full name</Label>
               <Input
+                id="register-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 type="text"
                 placeholder="Full name"
                 required
               />
+              <Label htmlFor="register-avatar">Avatar URL (optional)</Label>
               <Input
+                id="register-avatar"
                 value={avatarUrl}
                 onChange={(e) => setAvatarUrl(e.target.value)}
                 type="text"

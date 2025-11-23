@@ -21,7 +21,6 @@ export function Sidebar({
   openCount = 0,
   onLogout,
 }: SidebarProps) {
-
   return (
     <aside className="bg-white shadow h-screen w-72 flex flex-col p-6">
       {/* Logo and App Name */}
@@ -54,7 +53,7 @@ export function Sidebar({
         <div className="text-xs text-gray-500 mb-1">{currentUser?.email}</div>
         {/* Example: Last login (adjust logic if needed) */}
         {currentUser && (
-          <div className="text-[10px] text-gray-400">
+          <div className="text-[12px] text-gray-400">
             Last session: {new Date().toLocaleString()}
           </div>
         )}

@@ -36,7 +36,7 @@ export function AssignSelect({ users, selected, onChange }: AssignSelectProps) {
 
   return (
     <div>
-      <Label>Assign to users</Label>
+      <Label htmlFor="assignee-search">Assign to users</Label>
       <div className="flex flex-wrap gap-2 my-2">
         {selected.map((uid) => {
           const user = users.find((u) => u.uid === uid);
@@ -61,6 +61,7 @@ export function AssignSelect({ users, selected, onChange }: AssignSelectProps) {
         })}
       </div>
       <Input
+        id="assignee-search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setFocused(true)}

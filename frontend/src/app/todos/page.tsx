@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AssignSelect } from "../../components/todo/AssignSelect";
@@ -208,17 +209,21 @@ export default function TodosPage() {
         <div className="w-full max-w-2xl flex flex-col gap-4 mx-auto">
           {/* Create Todo Card */}
           <Card className="p-8 mb-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">
+            <h1 className="text-2xl font-bold mb-4 text-center">
               Team Tasks Dashboard
-            </h2>
+            </h1>
             <form onSubmit={handleCreateTodo} className="flex flex-col gap-4">
+              <Label htmlFor="todo-title">Todo title</Label>
               <Input
+                id="todo-title"
                 value={newTodo.title}
                 onChange={(e) => handleFormChange("title", e.target.value)}
                 placeholder="Todo title"
                 required
               />
+              <Label htmlFor="todo-desc">Description</Label>
               <Input
+                id="todo-desc"
                 value={newTodo.description}
                 onChange={(e) =>
                   handleFormChange("description", e.target.value)
