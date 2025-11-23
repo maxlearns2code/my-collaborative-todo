@@ -22,7 +22,7 @@ export function Sidebar({
   onLogout,
 }: SidebarProps) {
   return (
-    <aside className="bg-white shadow h-screen w-72 flex flex-col p-6">
+    <aside className="bg-white shadow min-h-screen w-72 flex flex-col p-6">
       {/* Logo and App Name */}
       <div className="mb-7">
         <div className="flex items-center justify-center mb-2">
