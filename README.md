@@ -1,19 +1,27 @@
 # My Collaborative Todo
 
-A full-stack **Collaborative Todo App** built with:
+**My Collaborative Todo** is a modern, production-minded, full-stack web app for managing personal and collaborative todo lists in real time. The app is designed for multiple users to collaborate seamlessly on shared tasks, assign todos, and track progress together—all with robust authentication and live synchronization.
 
-- **Frontend:** Next.js (TypeScript) — deployed on Vercel
-- **Backend:** Node.js + Express — deployed on Google Cloud Run
-- **Monorepo:** `/frontend` for app, `/backend` for API
+**Tech Stack & Architecture**  
+- **Frontend:** Next.js (TypeScript) — deployed on Vercel  
+- **Backend:** Node.js + Express (TypeScript) — deployed on Google Cloud Run  
+- **Data & Auth:** Firebase Authentication and Firestore  
+- **Monorepo:** `/frontend` for the app, `/backend` for the API
 
 ---
 
 ## Features
 
-- Collaborative todo lists with real-time updates (extend as you develop)
-- Clean separation of frontend and backend
-- Fully containerized backend for cloud deployment
-- Environment variables for easy reconfiguration
+- **Secure user registration & login** (Firebase Authentication)
+- **Personal and collaborative todo lists:** Create, update, and delete todos or assign them to other users for shared work
+- **Real-time updates** across all devices and users (Firestore-driven synchronization)
+- **Robust ownership & permissions:** Todos are only visible/editable to owners and assignees
+- **Clean separation of frontend and backend** for easier maintenance and scalability
+- **Fully containerized backend** for simple cloud deployment
+- **Environment variables** for easy configuration and deployment
+- **Scalable project structure** for professional development and team expansion
+
+---
 
 ## Screenshots
 
@@ -30,11 +38,12 @@ A full-stack **Collaborative Todo App** built with:
 
 ## Project Structure
 
-my-collaborative-todo/
-├── backend/ # Node.js backend (Express API, Dockerfile here)
-├── frontend/ # Next.js frontend (Vercel-ready)
+my-collaborative-todo/  
+├── backend/     # Node.js backend (Express API, Dockerfile here)  
+├── frontend/    # Next.js frontend (Vercel-ready)
 
 ---
+
 
 ## Getting Started Locally
 
