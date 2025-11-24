@@ -5,7 +5,8 @@ steps:
       - '--no-cache'
       - '-t'
       - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+
       - .
       - '-f'
       - Dockerfile
@@ -15,7 +16,8 @@ steps:
     args:
       - push
       - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+
     dir: backend
     id: Push
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -26,7 +28,8 @@ steps:
       - $_SERVICE_NAME
       - '--platform=managed'
       - >-
-        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        --image=europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
@@ -35,7 +38,8 @@ steps:
     entrypoint: gcloud
 images:
   - >-
-    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
