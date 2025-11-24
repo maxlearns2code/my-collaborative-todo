@@ -11,6 +11,9 @@ RUN npm install
 COPY . .
 RUN ls -l /usr/src/app && cat /usr/src/app/package.json
 
+# Make tsc executable to fix Linux/build permission issue
+RUN chmod +x ./node_modules/.bin/tsc
+
 # Build TypeScript (outputs to dist)
 RUN npm run build
 
