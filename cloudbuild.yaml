@@ -5,7 +5,7 @@ steps:
       - '--no-cache'
       - '-t'
       - europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
-      - backend
+      - .
       - '-f'
       - backend/Dockerfile
     id: Build
