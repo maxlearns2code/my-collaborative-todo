@@ -4,53 +4,37 @@ steps:
       - build
       - '--no-cache'
       - '-t'
-      - >-
-        europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
-
-      - .
+      - europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+      - backend
       - '-f'
-      - Dockerfile
-    dir: backend
+      - backend/Dockerfile
     id: Build
+
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - >-
-        europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
-
-    dir: backend
+      - europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
     id: Push
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run
       - services
       - update
-      - $_SERVICE_NAME
+      - todos-backend
       - '--platform=managed'
-      - >-
-        --image=europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
-
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - '--region=$_DEPLOY_REGION'
+      - --image=europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+      - --region=europe-north2
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+
 images:
-  - >-
-    europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
+  - europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
 
 options:
-  substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _AR_HOSTNAME: europe-north2-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-  _AR_PROJECT_ID: my-collaborative-todo
-  _TRIGGER_ID: c515d0ca-c757-44c1-b01b-8b06d026fcb9
-  _PLATFORM: managed
-  _SERVICE_NAME: todos-backend
-  _DEPLOY_REGION: europe-north2
+
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
