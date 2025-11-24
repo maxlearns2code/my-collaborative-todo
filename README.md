@@ -15,6 +15,17 @@ A full-stack **Collaborative Todo App** built with:
 - Fully containerized backend for cloud deployment
 - Environment variables for easy reconfiguration
 
+## Screenshots
+
+### Welcome Page
+![Welcome Page](frontend/public/welcome.png)
+
+### Login Page
+![Login Page](frontend/public/login.png)
+
+### Dashboard
+![Dashboard](frontend/public/dashboard.png)
+
 ---
 
 ## Project Structure
