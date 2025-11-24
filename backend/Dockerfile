@@ -9,6 +9,7 @@ RUN npm install
 
 # Copy all source files
 COPY . .
+RUN ls -l /usr/src/app && cat /usr/src/app/package.json
 
 # Build TypeScript (outputs to dist)
 RUN npm run build
