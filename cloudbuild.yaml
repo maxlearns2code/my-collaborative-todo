@@ -8,14 +8,12 @@ steps:
       - .
       - '-f'
       - Dockerfile
-    dir: backend
     id: Build
 
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - europe-north2-docker.pkg.dev/my-collaborative-todo/cloud-run-source-deploy/todos-backend:latest
-    dir: backend
     id: Push
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
