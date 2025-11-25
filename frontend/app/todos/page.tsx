@@ -168,15 +168,19 @@ export default function TodosPage() {
     }
   };
 
-  // Delete todo
+  // Optimistic Delete todo
   const handleDelete = async (id: string) => {
     if (!token) return;
+    // Optimistically remove item from state
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
     setLoading(true);
+    setError("");
     try {
       await apiRequest(`/todos/${id}`, "DELETE", null, token);
-      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+      // Success: nothing else needed
     } catch {
-      setError("Failed to delete todo.");
+      setError("Couldn't reach the server. Please check your connection.");
+      // Optionally: Refetch or restore todo if necessary.
     } finally {
       setLoading(false);
     }
