@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
 import type { User } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
@@ -68,9 +68,10 @@ export default function Home() {
           </div>
         )}
         <div className="text-center text-gray-400 text-sm">
-          • Real-time collaboration<br />
-          • Assign tasks to your team<br />
-          • Progress tracking and analytics
+          • Real-time collaboration
+          <br />
+          • Assign tasks to your team
+          <br />• Progress tracking and analytics
         </div>
       </Card>
     </main>

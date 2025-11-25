@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import type { User } from "@/types/user";
+import { Button } from "../ui/button";
 import Image from "next/image";
+import type { User } from "../../types/user";
 
 interface SidebarProps {
   currentUser: User | null;
