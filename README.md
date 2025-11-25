@@ -1,11 +1,15 @@
 # My Collaborative Todo
 
+**Live Demo:**  
+[https://arkivia-collaborative-todo.vercel.app/](https://arkivia-collaborative-todo.vercel.app/)
+
 **My Collaborative Todo** is a modern, production-minded, full-stack web app for managing personal and collaborative todo lists in real time. The app is designed for multiple users to collaborate seamlessly on shared tasks, assign todos, and track progress together—all with robust authentication and live synchronization.
 
-**Tech Stack & Architecture**  
-- **Frontend:** Next.js (TypeScript) — deployed on Vercel  
-- **Backend:** Node.js + Express (TypeScript) — deployed on Google Cloud Run  
-- **Data & Auth:** Firebase Authentication and Firestore  
+**Tech Stack & Architecture**
+
+- **Frontend:** Next.js (TypeScript) — deployed on Vercel
+- **Backend:** Node.js + Express (TypeScript) — deployed on Google Cloud Run
+- **Data & Auth:** Firebase Authentication and Firestore
 - **Monorepo:** `/frontend` for the app, `/backend` for the API
 
 ---
@@ -26,12 +30,15 @@
 ## Screenshots
 
 ### Welcome Page
+
 ![Welcome Page](frontend/public/welcome.png)
 
 ### Login Page
+
 ![Login Page](frontend/public/login.png)
 
 ### Dashboard
+
 ![Dashboard](frontend/public/dashboard.png)
 
 ---
@@ -39,11 +46,10 @@
 ## Project Structure
 
 my-collaborative-todo/  
-├── backend/     # Node.js backend (Express API, Dockerfile here)  
+├── backend/    # Node.js backend (Express API, Dockerfile here)  
 ├── frontend/    # Next.js frontend (Vercel-ready)
 
 ---
-
 
 ## Getting Started Locally
 
@@ -128,4 +134,4 @@ Frontend (set on Vercel):
 
 ## Author
 
-[Maxime Dewynter]
+[Maxime Dewynter](https://www.linkedin.com/in/maxime-dewynter/)
