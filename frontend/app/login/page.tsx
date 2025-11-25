@@ -28,6 +28,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [registerMode, setRegisterMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // <-- NEW STATE
 
   const router = useRouter();
 
@@ -108,14 +109,25 @@ export default function LoginPage() {
           />
 
           <Label htmlFor="login-password">Password</Label>
-          <Input
-            id="login-password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-            type="password"
-            placeholder="Password"
-            required
-          />
+          <div className="relative">
+            <Input
+              id="login-password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+              className="pr-16"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+              tabIndex={-1}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
 
           {registerMode && (
             <>
