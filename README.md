@@ -3,12 +3,12 @@
 **Live Demo:**  
 [https://arkivia-collaborative-todo.vercel.app/](https://arkivia-collaborative-todo.vercel.app/)
 
-**My Collaborative Todo** is a modern, production-minded, full-stack web app for managing personal and collaborative todo lists in real time. The app is designed for multiple users to collaborate seamlessly on shared tasks, assign todos, and track progress together—all with robust authentication and live synchronization.
+**My Collaborative Todo** is a modern, production-minded, full-stack web app for managing personal and collaborative todo lists in real time. The app is designed for multiple users to collaborate seamlessly on shared tasks, assign todos, and track progress together, all with robust authentication and live synchronization.
 
 **Tech Stack & Architecture**
 
 - **Frontend:** Next.js (TypeScript) — deployed on Vercel
-- **Backend:** Node.js + Express (TypeScript) — deployed on Google Cloud Run
+- **Backend:** Node.js + Express (TypeScript) — deployed on Render
 - **Data & Auth:** Firebase Authentication and Firestore
 - **Monorepo:** `/frontend` for the app, `/backend` for the API
 
@@ -69,24 +69,25 @@ npm run dev # Starts Next.js on http://localhost:3000
   In `/frontend/.env` (or Vercel dashboard), set:
 
 NEXT*PUBLIC_API_URL=http://localhost:4000
-*(for production: use your actual Google Cloud Run backend URL)\_
+*(for production: use your actual Render backend URL)*
 
 ---
 
 ## Deployment
 
-### Backend
+### Backend (Render)
 
-- **Google Cloud Run**
+- **Render**
 - Dockerfile is in `/backend`
-- Uses Google Cloud Build, with `cloudbuild.yaml` configured to build from `/backend`
-- Create/update builds by pushing changes to `main`
+- Backend service set up as a **Web Service** on Render (Node.js + Express)
+- Automatic builds and deploys by connecting your GitHub repo to Render
+- Set environment variables and API URLs from Render dashboard
 
 ### Frontend
 
 - **Vercel**
 - Connect `/frontend` folder as project root
-- Set `NEXT_PUBLIC_API_URL` as a Vercel environment variable (use your Cloud Run endpoint in production)
+- Set `NEXT_PUBLIC_API_URL` as a Vercel environment variable (use your Render backend endpoint in production)
 - Automatic builds and deploys on push
 
 ---
@@ -109,14 +110,14 @@ From `/frontend`:
 
 ## Continuous Deployment
 
-- **Backend**: Pushing to `main` triggers Cloud Build → Docker image → deploys to Cloud Run
-- **Frontend**: Pushing to `main` deploys via Vercel
+- **Backend:** GitHub → Render auto-builds and deploys each push to `main`
+- **Frontend:** Pushing to `main` deploys via Vercel
 
 ---
 
 ## Environment Variables
 
-Backend (set on Cloud Run):
+Backend (set in Render dashboard):
 
 - Example: `FIREBASE_KEY`, `NODE_ENV`, etc.
 
