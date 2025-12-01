@@ -7,14 +7,17 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "media.licdn.com",
       },
-      // Add more patterns if needed:
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+      },
+      // add more if you switch to other avatar sources:
       // {
       //   protocol: "https",
-      //   hostname: "another-domain.com",
+      //   hostname: "avatars.githubusercontent.com",
       // },
     ],
   },
-  // ...other config options
 };
 
 export default nextConfig;

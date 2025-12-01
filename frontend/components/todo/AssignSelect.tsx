@@ -5,6 +5,19 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
+const isAllowedAvatarHost = (url: string) => {
+  try {
+    const u = new URL(url);
+    return (
+      u.hostname === "media.licdn.com" ||
+      u.hostname === "encrypted-tbn0.gstatic.com"
+      // || u.hostname === "avatars.githubusercontent.com"
+    );
+  } catch {
+    return false;
+  }
+};
+
 interface AssignSelectProps {
   users: User[];
   selected: string[]; // array of user IDs
@@ -84,7 +97,7 @@ export function AssignSelect({ users, selected, onChange }: AssignSelectProps) {
                 onMouseDown={() => addUser(u.uid)}
               >
                 <span className="flex items-center">
-                  {u.avatarUrl && (
+                  {u.avatarUrl && isAllowedAvatarHost(u.avatarUrl) ? (
                     <Image
                       src={u.avatarUrl}
                       alt={u.name || "User"}
@@ -92,6 +105,8 @@ export function AssignSelect({ users, selected, onChange }: AssignSelectProps) {
                       height={24}
                       className="w-6 h-6 rounded-full mr-2"
                     />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-gray-300 mr-2" />
                   )}
                   {u.name}
                   <span className="ml-2 text-xs text-gray-500">{u.email}</span>
