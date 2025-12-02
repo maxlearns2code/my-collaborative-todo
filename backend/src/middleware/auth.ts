@@ -3,7 +3,7 @@ import { auth } from "../firebase.js";
 import { db } from "../firebase.js";
 
 export interface AuthRequest extends Request {
-  userId?: string;
+  userId: string;           // now required
   userEmail?: string;
 }
 
@@ -18,24 +18,31 @@ export const verifyFirebaseToken = async (
   }
 
   const token = authHeader.split(" ")[1];
-  if (typeof token !== "string" || !token) {
+  if (!token) {
     return res.status(401).json({ error: "Token not found" });
   }
 
   try {
-    const decoded = await auth.verifyIdToken(token as string);
-    req.userId = decoded.uid ?? "";
-    req.userEmail = decoded.email ?? "";
+    const decoded = await auth.verifyIdToken(token);
 
-    // Pull name and avatar from Firebase Auth JWT, if present
-    const name = decoded.name ?? "";
-    const avatarUrl = decoded.picture ?? "";
+    if (!decoded.uid) {
+      return res.status(401).json({ error: "Invalid token payload" });
+    }
 
-    // Ensure Firestore profile exists for this user (with info)
-    await ensureFirestoreUser(req.userId, req.userEmail, name, avatarUrl);
+    req.userId = decoded.uid;
+
+    if (typeof decoded.email === "string") {
+      req.userEmail = decoded.email;
+    }
+
+    const name = typeof decoded.name === "string" ? decoded.name : "";
+    const avatarUrl =
+      typeof decoded.picture === "string" ? decoded.picture : "";
+
+    await ensureFirestoreUser(req.userId, req.userEmail ?? "", name, avatarUrl);
 
     next();
-  } catch (e) {
+  } catch {
     return res.status(401).json({ error: "Invalid token" });
   }
 };
@@ -46,6 +53,10 @@ export async function ensureFirestoreUser(
   name: string,
   avatarUrl: string
 ) {
+  if (!uid) {
+    throw new Error("ensureFirestoreUser called without uid");
+  }
+
   const ref = db.collection("users").doc(uid);
   const doc = await ref.get();
   if (!doc.exists) {
