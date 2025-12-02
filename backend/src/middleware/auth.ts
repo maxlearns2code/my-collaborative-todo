@@ -1,4 +1,9 @@
-import type { Request, Response, NextFunction } from "express";
+import type {
+  Request,
+  Response,
+  NextFunction,
+  RequestHandler,
+} from "express";
 import { auth } from "../firebase.js";
 import { db } from "../firebase.js";
 
@@ -7,13 +12,14 @@ export interface AuthRequest extends Request {
   userEmail?: string;
 }
 
-export const verifyFirebaseToken = async (
-  req: AuthRequest,
+export const verifyFirebaseToken: RequestHandler = async (
+  req,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const authHeader = req.headers.authorization;
+  const authReq = req as AuthRequest;
 
+  const authHeader = authReq.headers.authorization;
   if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Missing token" });
     return;
@@ -26,24 +32,29 @@ export const verifyFirebaseToken = async (
   }
 
   try {
-    const decoded = await auth.verifyIdToken(token); // Firebase Admin verifyIdToken [web:18]
+    const decoded = await auth.verifyIdToken(token); // Firebase Admin ID token verification [web:18]
 
     if (!decoded.uid) {
       res.status(401).json({ error: "Invalid token payload" });
       return;
     }
 
-    req.userId = decoded.uid;
+    authReq.userId = decoded.uid;
 
     if (typeof decoded.email === "string") {
-      req.userEmail = decoded.email;
+      authReq.userEmail = decoded.email;
     }
 
     const name = typeof decoded.name === "string" ? decoded.name : "";
     const avatarUrl =
       typeof decoded.picture === "string" ? decoded.picture : "";
 
-    await ensureFirestoreUser(req.userId, req.userEmail ?? "", name, avatarUrl);
+    await ensureFirestoreUser(
+      authReq.userId,
+      authReq.userEmail ?? "",
+      name,
+      avatarUrl
+    );
     next();
   } catch {
     res.status(401).json({ error: "Invalid token" });
@@ -61,7 +72,7 @@ export async function ensureFirestoreUser(
   }
 
   const ref = db.collection("users").doc(uid);
-  const doc = await ref.get(); // Firestore get() existence check [web:84][web:79]
+  const doc = await ref.get(); // Firestore document existence check [web:84]
 
   if (!doc.exists) {
     await ref.set({
